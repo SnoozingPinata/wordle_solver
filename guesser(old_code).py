@@ -7,7 +7,7 @@ def load_words(file_name):
 
 
 def get_letter_count_hash():
-    alphabet_list = list(string.ascii_lowercase)
+    alphabet_list = string.ascii_lowercase
     frequency_hash = {}
     for letter in alphabet_list:
         frequency_hash.update({letter: 0})
@@ -30,25 +30,6 @@ def get_position_frequency_hash(word_list):
             position_frequency_hash_list[position][letter] += 1
             position += 1
     return position_frequency_hash_list
-
-
-
-
-def hit_picker(solution_word_list, combined_word_list):
-    # based on most common letters and letter placements in solution_word_list, pick the best word in combined_word_list
-    pass
-
-def solution_picker(words):
-    pass
-
-def exclusion_picker(words):
-    pass
-
-def mixed_picker(words):
-    pass
-
-
-
 
 
 if __name__ == "__main__":
