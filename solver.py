@@ -98,6 +98,7 @@ class WordleHelper:
             position += 1
     
     def print_list_analytics(self):
+        print("")
         self.wordle_list.update_letter_frequency_list()
         print("Most common letters:")
         alphabet_list = string.ascii_lowercase
@@ -107,6 +108,7 @@ class WordleHelper:
             letter_count_value = letter_count_list[i]
             if letter_count_value != 0:
                 print(f"{current_letter} = {letter_count_value}")
+        print("")
 
     def wordler_interface(self):
         while True:
@@ -126,6 +128,7 @@ class WordleHelper:
 # Note:
 # need to also prune the guess list after getting information
 # currently no handling for multiple letters in a word.
+# first, third, and fifth positions seem to cancel more words out. 
 
 
 if __name__ == "__main__":
