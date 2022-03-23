@@ -135,7 +135,10 @@ if __name__ == "__main__":
     solution_words = get_list_from_file('answers.txt')
     #guess_words = get_list_from_file('guesses.txt')
 
+    #whole_list = solution_words + guess_words
+
     solution_list = WordleList(solution_words)
+    #solution_list = WordleList(whole_list)
     #guess_list = WordleList(guess_words)
 
     helper = WordleHelper(solution_list)
