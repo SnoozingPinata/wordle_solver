@@ -115,8 +115,8 @@ class WordleHelper:
             possible_solutions_count =  self.wordle_list.count()
             if possible_solutions_count == 1:
                 break
-            elif possible_solutions_count <= 10:
-                print("There are 10 or less solutions remaining:")
+            elif possible_solutions_count <= 20:
+                print("There are 20 or less solutions remaining:")
                 print(self.wordle_list.word_list)
             print(f"There are {possible_solutions_count} possible solutions.")
             self.print_list_analytics()
