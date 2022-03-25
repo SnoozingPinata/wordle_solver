@@ -34,7 +34,7 @@ class WordleList:
         self.word_list = new_word_list
 
     def remove_words_without_letter(self, letter):
-        # use this when you have a yellow or green score on a letter
+        # use this when you have a yellow score on a letter
         new_word_list = self.word_list.copy()
         for word in self.word_list:
             if letter not in word:
