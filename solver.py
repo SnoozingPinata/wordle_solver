@@ -1,5 +1,6 @@
 import string
 
+
 # For importing the word lists from text files.
 def get_list_from_file(file_name):
     return_list = []
@@ -10,9 +11,11 @@ def get_list_from_file(file_name):
 
 
 class WordleList:
-    def __init__(self, word_list):
-        self.word_list = word_list
-        self.letter_frequency_list = []
+    def __init__(self, solution_word_list, all_words_list):
+        self.word_list = solution_word_list
+        self.all_words_list = all_words_list
+        self.letter_frequency_dict = {}
+        self.correct_letters = []
 
     def remove_words_with_letter(self, letter):
         # use this when you have a grey score on a letter
@@ -39,41 +42,109 @@ class WordleList:
         self.word_list = new_word_list
 
     def remove_words_without_letter_in_position(self, letter, letter_index):
-        # use this when you have a yellow score on a letter
-        # use this when you have a green score as well(?)
+        # use this when you have a green score on a letter
         new_word_list = self.word_list.copy()
         for word in self.word_list:
             if word[letter_index] != letter:
                 new_word_list.remove(word)
         self.word_list = new_word_list
 
+    def remove_words_with_two_letter(self, letter):
+        # use this when you have a grey score on the second of the same letter
+        new_word_list = self.word_list.copy()
+        for word in self.word_list:
+            if word.count(letter) >= 2:
+                new_word_list.remove(word)
+        self.word_list = new_word_list
+
     def count(self):
         return len(self.word_list)
 
-    def _get_numeric_value_of_letter(self, letter):
-        alphabet_list = string.ascii_lowercase
-        return alphabet_list.index(letter)
+    def initialize_frequency_dict(self):
+        alphabet_dict = {}
+        for letter in string.ascii_lowercase:
+            alphabet_dict.update({letter: 0})
+        self.letter_frequency_dict = alphabet_dict
 
-    def _get_alphabetical_value_of_number(self, number):
-        alphabet_list = string.ascii_lowercase
-        return alphabet_list[number]
-
-    def _get_blank_letter_count_list(self):
-        blank_list = []
-        for i in range(0, 26):
-            blank_list.append(0)
-        return blank_list
-
-    def update_letter_frequency_list(self):
-        letter_frequency_list = self._get_blank_letter_count_list()
+    def analyze(self):
+        self.initialize_frequency_dict()
         for word in self.word_list:
             for letter in word:
-                index = self._get_numeric_value_of_letter(letter)
-                letter_frequency_list[index] += 1
-        self.letter_frequency_list = letter_frequency_list
+                current_value = self.letter_frequency_dict[letter]
+                self.letter_frequency_dict.update({letter: current_value + 1})
     
     def get_most_common_letters(self):
-        return self.letter_frequency_list
+        return self.letter_frequency_dict.copy()
+
+    def input_letter_details(self, letter, position, grade):
+        if grade == 'grey':
+            self.remove_words_with_letter(letter)
+        elif grade == 'green':
+            self.remove_words_without_letter_in_position(letter, position)
+            if letter not in self.correct_letters:
+                self.correct_letters.append(letter)
+        elif grade == 'yellow':
+            self.remove_words_without_letter(letter)
+            self.remove_words_with_letter_in_position(letter, position)
+            if letter not in self.correct_letters:
+                self.correct_letters.append(letter)
+
+    def input(self, graded_word_details):
+        letters, grades = graded_word_details
+        graded_letters = []
+        while len(graded_letters) < len(letters):
+            # grade greens, then yellows, then greys
+            if 'green' in grades:
+                index = grades.index('green')
+                letter = letters[index]
+                self.input_letter_details(letter, index, 'green')
+                graded_letters.append(letter)
+                grades[index] = ''
+            elif 'yellow' in grades:
+                index = grades.index('yellow')
+                letter = letters[index]
+                self.input_letter_details(letter, index, 'yellow')
+                graded_letters.append(letter)
+                grades[index] = ''
+            elif 'grey' in grades:
+                index = grades.index('grey')
+                letter = letters[index]
+                if letter in graded_letters:
+                    self.remove_words_with_two_letter(letter)
+                else:
+                    self.input_letter_details(letter, index, 'grey')
+                graded_letters.append(letter)
+                grades[index] = ''
+
+    def get_exclusion_guess_recommendation(self):
+        word_score_dict = {}
+        for word in self.all_words_list:
+            word_score = 0
+            repeated_letters = []
+            for letter in word:
+                if letter not in repeated_letters and letter not in self.correct_letters:
+                    word_score += self.letter_frequency_dict[letter]
+                repeated_letters.append(letter)
+            word_score_dict.update({word_score: word})
+        values_list = sorted(word_score_dict.keys())
+        highest_score = values_list.pop()
+        best_word = word_score_dict[highest_score]
+        return best_word
+
+    def get_answer_guess_recommendation(self):
+        word_score_dict = {}
+        for word in self.word_list:
+            word_score = 0
+            repeated_letters = []
+            for letter in word:
+                if letter not in repeated_letters:
+                    word_score += self.letter_frequency_dict[letter]
+                repeated_letters.append(letter)
+            word_score_dict.update({word_score: word})
+        values_list = sorted(word_score_dict.keys())
+        highest_score = values_list.pop()
+        best_word = word_score_dict[highest_score]
+        return best_word
 
 
 class WordleHelper:
@@ -81,65 +152,39 @@ class WordleHelper:
         self.wordle_list = wordle_list
 
     def input_score_for_word(self, guess_word):
-        print("\n" + "  --- --- ---  " + "\n")
-        position = 0
+        letters = []
+        grades = []
+        valid_scores = ['grey', 'yellow', 'green']
         for letter in guess_word:
-            letter_score = input(f"What did '{letter}' score? (grey, green, yellow)")
-            grey_score = letter_score == "grey"
-            green_score = letter_score == "green"
-            yellow_score = letter_score == "yellow"
-            if grey_score:
-                self.wordle_list.remove_words_with_letter(letter)
-            elif green_score:
-                self.wordle_list.remove_words_without_letter_in_position(letter, position)
-            elif yellow_score:
-                self.wordle_list.remove_words_without_letter(letter)
-                self.wordle_list.remove_words_with_letter_in_position(letter, position)
-            position += 1
+            grade = input(f"What did '{letter}' score? (grey, green, yellow)")
+            while grade not in valid_scores:
+                print("invalid score")
+                grade = input(f"What did '{letter}' score? (grey, green, yellow)")
+            letters.append(letter)
+            grades.append(grade)
+        graded_word_details = (letters, grades)
+        self.wordle_list.input(graded_word_details)
     
-    def print_list_analytics(self):
-        print("")
-        self.wordle_list.update_letter_frequency_list()
-        print("Most common letters:")
-        alphabet_list = string.ascii_lowercase
-        letter_count_list = self.wordle_list.get_most_common_letters()
-        for i in range(0, 26):
-            current_letter = alphabet_list[i]
-            letter_count_value = letter_count_list[i]
-            if letter_count_value != 0:
-                print(f"{current_letter} = {letter_count_value}")
-        print("")
-
     def wordler_interface(self):
         while True:
+            self.wordle_list.analyze()
             possible_solutions_count =  self.wordle_list.count()
             if possible_solutions_count == 1:
                 break
-            elif possible_solutions_count <= 20:
-                print("There are 20 or less solutions remaining:")
-                print(self.wordle_list.word_list)
             print(f"There are {possible_solutions_count} possible solutions.")
-            self.print_list_analytics()
+            print(f"Exclusion Guess: {self.wordle_list.get_exclusion_guess_recommendation()}.")
+            print(f"Answer Guess: {self.wordle_list.get_answer_guess_recommendation()}.")
             guess_word = input("What word did you guess?")
             self.input_score_for_word(guess_word)
         print(f"The answer is {self.wordle_list.word_list[0]}")
 
 
-# Note:
-# need to also prune the guess list after getting information
-# currently no handling for multiple letters in a word.
-# first, third, and fifth positions seem to cancel more words out. 
-
-
 if __name__ == "__main__":
     solution_words = get_list_from_file('answers.txt')
-    #guess_words = get_list_from_file('guesses.txt')
+    guess_words = get_list_from_file('guesses.txt')
+    whole_list = solution_words.copy() + guess_words.copy()
 
-    #whole_list = solution_words + guess_words
-
-    solution_list = WordleList(solution_words)
-    #solution_list = WordleList(whole_list)
-    #guess_list = WordleList(guess_words)
+    solution_list = WordleList(solution_words, whole_list)
 
     helper = WordleHelper(solution_list)
     helper.wordler_interface()
