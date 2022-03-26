@@ -14,5 +14,4 @@ General Strategy:
 word picking strategies:
   solution guess - choosing the most likely word to be the solution
   exclusion guess - a guess used to rule out as many possible solutions as possible
-  mixed guess - a word chosen to test specific letters for a solution and other letters exclusionarily
-  hit guess - a word chosen to try to find information (like a first or possibly second word choice)
+  mixed guess - a word chosen to test specific letters for a solution and other letters for exclusions
