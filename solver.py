@@ -73,9 +73,6 @@ class WordleList:
                 current_value = self.letter_frequency_dict[letter]
                 self.letter_frequency_dict.update({letter: current_value + 1})
     
-    def get_most_common_letters(self):
-        return self.letter_frequency_dict.copy()
-
     def input_letter_details(self, letter, position, grade):
         if grade == 'grey':
             self.remove_words_with_letter(letter)
